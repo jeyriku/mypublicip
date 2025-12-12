@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+mypublicip/__init__.py
+mypublicip/mypublicip.py
+mypublicip.egg-info/PKG-INFO
+mypublicip.egg-info/SOURCES.txt
+mypublicip.egg-info/dependency_links.txt
+mypublicip.egg-info/entry_points.txt
+mypublicip.egg-info/top_level.txt
