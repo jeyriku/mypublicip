@@ -74,23 +74,59 @@ publish:nexus:
     - python -V
     - pip install --upgrade pip build twine
     - pip install git+http://jeysrv12:8090/jeyriku/jeyriku-vault.git -q
-    - mkdir -p ~/.jeyriku
-    - printf '%s' "$VAULT_ENC" | base64 -d > ~/.jeyriku/vault.enc
   script:
     - echo "🚀 Publication mypublicip vers Nexus PyPI Repository..."
     - echo "Repository -> ${NEXUS_PYPI_URL}"
     - |
-      python3 -c "
+      python3 - <<'PY'
+      import base64
       import os
-      from jeyriku_vault import VaultManager
-      vm = VaultManager(backend='encrypted_file')
-      vm.unlock(os.environ['VAULT_MASTER_PASSWORD'])
-      cred = vm.get_credential('nexus')
-      content = '[distutils]\nindex-servers = nexus\n\n[nexus]\nrepository: {}\nusername: {}\npassword: {}\n'.format(os.environ['NEXUS_PYPI_URL'], cred.username, cred.password)
-      open(os.path.expanduser('~/.pypirc'), 'w').write(content)
-      print('✅ .pypirc créé')
-      "
-    - chmod 600 ~/.pypirc
+      from pathlib import Path
+
+      def first(*names):
+          for name in names:
+              value = os.environ.get(name)
+              if value:
+                  return value
+          return ""
+
+      nexus_url = os.environ["NEXUS_PYPI_URL"]
+      username = first("NEXUS_USERNAME", "NEXUS_USER", "NEXUS_LOGIN")
+      password = first("NEXUS_PASSWORD", "NEXUS_PASSWD", "NEXUS_PASS", "NEXUS_PWD")
+
+      if not username or not password:
+          master = first("VAULT_MASTER_PASSWORD", "VAULT_PASSWORD", "VAULT_MASTER_PASSWD")
+          vault_enc = os.environ.get("VAULT_ENC", "")
+          if master:
+              from jeyriku_vault import VaultManager
+
+              if vault_enc:
+                  vault_dir = Path.home() / ".jeyriku"
+                  vault_dir.mkdir(parents=True, exist_ok=True)
+                  (vault_dir / "vault.enc").write_bytes(base64.b64decode(vault_enc))
+
+              vm = VaultManager(backend="encrypted_file")
+              vm.unlock(master)
+              cred = vm.get_credential("nexus")
+              username = username or getattr(cred, "username", "")
+              password = password or getattr(cred, "password", "")
+
+      if not username or not password:
+          raise SystemExit("Missing Nexus credentials (vault and env fallback failed)")
+
+      pypirc = (
+          "[distutils]\n"
+          "index-servers = nexus\n\n"
+          "[nexus]\n"
+          f"repository = {nexus_url}\n"
+          f"username = {username}\n"
+          f"password = {password}\n"
+      )
+      p = Path.home() / ".pypirc"
+      p.write_text(pypirc)
+      os.chmod(p, 0o600)
+      print("✅ .pypirc généré")
+      PY
     - twine upload --repository nexus dist/* --verbose
     - echo "✅ mypublicip publié avec succès sur Nexus!"
   dependencies:
