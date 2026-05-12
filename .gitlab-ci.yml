@@ -14,6 +14,7 @@ stages:
   - test
   - build
   - publish
+  - mirror
 
 .python_template: &python_template
   image: python:${PYTHON_VERSION}-slim
@@ -95,5 +96,35 @@ publish:nexus:
   dependencies:
     - build:package
   only:
+    - main
+    - master
+    - tags
+  when: on_success
+
+# ========================================
+# STAGE 4: Mirror GitLab -> GitHub
+# ========================================
+mirror:github:
+  stage: mirror
+  image: alpine:3.20
+  before_script:
+    - apk add --no-cache git
+  script:
+    - echo "🔁 Mirror mypublicip vers GitHub..."
+    - |
+      if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
+        echo "❌ Missing GITHUB_MIRROR_TOKEN CI variable"
+        exit 1
+      fi
+    - git config --global user.email "ci@jeyriku.net"
+    - git config --global user.name "GitLab CI"
+    - git remote add github-mirror "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/jeyriku/mypublicip.git"
+    - git push --force github-mirror "HEAD:refs/heads/main"
+    - git push --force github-mirror "HEAD:refs/heads/master"
+    - git push --force github-mirror --tags
+    - echo "✅ Mirror GitHub mypublicip OK"
+  only:
+    - main
+    - master
     - tags
   when: on_success
