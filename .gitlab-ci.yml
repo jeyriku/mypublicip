@@ -9,6 +9,7 @@ variables:
 cache:
   paths:
     - .cache/pip
+    - venv/
 
 stages:
   - test
@@ -19,8 +20,10 @@ stages:
 .python_template: &python_template
   image: python:${PYTHON_VERSION}-slim
   before_script:
+    - apt-get update -qq && apt-get install -y -qq curl
     - python -V
     - pip install --upgrade pip
+    - pip install build twine pytest
 
 # ========================================
 # STAGE 1: Validation
@@ -48,8 +51,10 @@ build:package:
   <<: *python_template
   stage: build
   script:
-    - pip install build
     - echo "📦 Build du package mypublicip..."
+    - |
+      CURRENT_VERSION=$(grep '^version = ' pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+      echo "📦 Version: ${CURRENT_VERSION}"
     - python -m build
     - echo "📋 Packages créés:"
     - ls -lh dist/
@@ -70,7 +75,7 @@ publish:nexus:
   <<: *python_template
   stage: publish
   before_script:
-    - apt-get update -qq && apt-get install -y -qq git
+    - apt-get update -qq && apt-get install -y -qq git curl
     - python -V
     - pip install --upgrade pip build twine
     - pip install git+http://jeysrv12:8090/jeyriku/jeyriku-vault.git -q
@@ -145,6 +150,15 @@ publish:nexus:
     - master
     - tags
   when: on_success
+
+cleanup:on_failure:
+  stage: publish
+  script:
+    - echo "🧹 Nettoyage après échec du pipeline..."
+    - rm -rf dist/ build/ *.egg-info
+    - echo "✅ Nettoyage terminé"
+  when: on_failure
+  allow_failure: true
 
 # ========================================
 # STAGE 4: Mirror GitLab -> GitHub
