@@ -15,6 +15,7 @@ stages:
   - test
   - build
   - publish
+  - tag
   - mirror
 
 .python_template: &python_template
@@ -65,7 +66,6 @@ build:package:
     expire_in: 1 week
   only:
     - main
-    - master
     - tags
 
 # ========================================
@@ -148,7 +148,6 @@ publish:nexus:
     - build:package
   only:
     - main
-    - master
     - tags
   when: on_success
 
@@ -164,6 +163,34 @@ cleanup:on_failure:
 # ========================================
 # STAGE 4: Mirror GitLab -> GitHub
 # ========================================
+# ========================================
+# STAGE 4: Tag de version automatique
+# ========================================
+tag:version:
+  stage: tag
+  image: alpine:3.20
+  script:
+    - apk add --no-cache curl
+    - VERSION=$(grep '^version = ' pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+    - echo "🏷️ Création du tag ${VERSION}..."
+    - |
+      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+        -X POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags" \
+        --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
+        --data "tag_name=${VERSION}&ref=${CI_COMMIT_SHA}")
+    - |
+      if [ "$RESPONSE" = "201" ]; then
+        echo "✅ Tag ${VERSION} créé"
+      elif [ "$RESPONSE" = "400" ]; then
+        echo "ℹ️ Tag ${VERSION} existe déjà, skip"
+      else
+        echo "❌ Création tag échouée (HTTP ${RESPONSE})"
+        exit 1
+      fi
+  only:
+    - main
+
+
 mirror:github:
   stage: mirror
   image: alpine:3.20
@@ -180,11 +207,9 @@ mirror:github:
     - git config --global user.name "GitLab CI"
     - git remote add github-mirror "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/jeyriku/mypublicip.git"
     - git push --force github-mirror "HEAD:refs/heads/main"
-    - git push --force github-mirror "HEAD:refs/heads/master"
     - git push --force github-mirror --tags
     - echo "✅ Mirror GitHub mypublicip OK"
   only:
     - main
-    - master
     - tags
   when: on_success
