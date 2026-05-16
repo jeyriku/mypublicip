@@ -136,8 +136,7 @@ publish:nexus:
     - echo "📤 Upload vers Nexus..."
     - |
       PKG_VERSION=$(grep '^version = ' pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
-      ALREADY=$(curl -sf "http://jeysrv12:8081/repository/pypi-releases/simple/mypublicip/" 2>/dev/null | grep -c "mypublicip-${PKG_VERSION}" || echo "0")
-      if [ "$ALREADY" -gt "0" ]; then
+      if curl -sf "http://jeysrv12:8081/repository/pypi-releases/simple/mypublicip/" 2>/dev/null | grep -q "${PKG_VERSION}"; then
         echo "ℹ️ Version ${PKG_VERSION} déjà présente sur Nexus — upload ignoré"
       else
         twine upload --repository nexus dist/* --verbose
