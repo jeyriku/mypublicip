@@ -77,7 +77,8 @@ publish:nexus:
   before_script:
     - apt-get update -qq && apt-get install -y -qq git curl
     - python -V
-    - pip install --upgrade pip build twine
+    - pip install --upgrade pip
+    - pip install build twine
     - pip install git+http://jeysrv12:8090/jeyriku/jeyriku-vault.git -q
   script:
     - echo "🚀 Publication mypublicip vers Nexus PyPI Repository..."
