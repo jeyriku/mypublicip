@@ -127,8 +127,17 @@ publish:nexus:
       os.chmod(p, 0o600)
       print("✅ .pypirc généré")
       PY
-    - twine upload --repository nexus dist/* --verbose
-    - echo "✅ mypublicip publié avec succès sur Nexus!"
+    - echo "📤 Upload vers Nexus..."
+    - |
+      PKG_VERSION=$(grep '^version = ' pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+      ALREADY=$(curl -sf "http://jeysrv12:8081/repository/pypi-releases/simple/mypublicip/" 2>/dev/null | grep -c "mypublicip-${PKG_VERSION}" || echo "0")
+      if [ "$ALREADY" -gt "0" ]; then
+        echo "ℹ️ Version ${PKG_VERSION} déjà présente sur Nexus — upload ignoré"
+      else
+        twine upload --repository nexus dist/* --verbose
+        echo "✅ mypublicip publié avec succès sur Nexus!"
+      fi
+    - echo "📍 Accès -> http://jeysrv12:8081/repository/pypi-releases/"
   dependencies:
     - build:package
   only:
