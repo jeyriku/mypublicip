@@ -79,7 +79,7 @@ publish:nexus:
     - python -V
     - pip install --upgrade pip
     - pip install build twine
-    - pip install --extra-index-url http://jeysrv12:8081/repository/pypi-releases/simple/ "pyvault-web>=1.1.1"
+    - pip install --trusted-host jeysrv12 --extra-index-url http://jeysrv12:8081/repository/pypi-releases/simple/ "pyvault-web>=1.1.1"
   script:
     - echo "🚀 Publication mypublicip vers Nexus PyPI Repository..."
     - echo "Repository -> ${NEXUS_PYPI_URL}"
