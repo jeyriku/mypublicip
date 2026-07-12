@@ -2,6 +2,10 @@
 
 MyPublicIp is a Python module that retrieves the public IP address of the current connection using a simple command-line interface.
 
+## Centralized CI credentials with PyVault
+
+The application itself requires no credentials. Its GitLab pipeline now authenticates to central PyVault using the masked `PYVAULT_URL` and `PYVAULT_TOKEN` variables and retrieves the `nexus` credential for package publication. The repository no longer installs or unlocks `jeyriku-vault`.
+
 ## Features
 
 - Retrieves the public IP address using the `curl` command.
