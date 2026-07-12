@@ -17,7 +17,7 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        # Add any dependencies your package needs here
+        'pyvault-web>=1.1.1',
     ],
     entry_points={
         'console_scripts': [

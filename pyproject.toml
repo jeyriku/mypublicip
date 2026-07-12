@@ -15,7 +15,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-dependencies = []
+dependencies = [
+    "pyvault-web>=1.1.1",
+]
 
 [project.scripts]
 mypublicip = "mypublicip.mypublicip:main"
