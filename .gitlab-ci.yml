@@ -9,6 +9,7 @@ variables:
   # the test job's editable install) must be able to resolve the Nexus index.
   PIP_EXTRA_INDEX_URL: "http://jeysrv12:8081/repository/pypi-releases/simple/"
   PIP_TRUSTED_HOST: "jeysrv12"
+  PYVAULT_URL: "http://pyvault.int.jeyriku.net:8000"
 
 cache:
   paths:
