@@ -5,6 +5,10 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PYTHON_VERSION: "3.11"
   NEXUS_PYPI_URL: "http://jeysrv12:8081/repository/pypi-releases/"
+  # pyvault-web is an internal dependency, so every pip invocation (including
+  # the test job's editable install) must be able to resolve the Nexus index.
+  PIP_EXTRA_INDEX_URL: "http://jeysrv12:8081/repository/pypi-releases/simple/"
+  PIP_TRUSTED_HOST: "jeysrv12"
 
 cache:
   paths:
