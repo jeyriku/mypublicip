@@ -1,2 +1,5 @@
 # Local release helpers
 /scripts/
+
+__pycache__/
+*.py[cod]
