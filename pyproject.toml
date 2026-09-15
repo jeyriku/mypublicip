@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mypublicip"
-version = "0.1.9"
+version = "0.1.10"
 description = "A module to retrieve the public IP address of the current connection."
 authors = [{ name = "Jeremie Rouzet", email = "your_email@example.com" }]
 license = { text = "MIT" }
@@ -15,9 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "pyvault-web>=1.1.1",
-]
+dependencies = []
 
 [project.scripts]
 mypublicip = "mypublicip.cli:main"

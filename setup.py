@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mypublicip',
-    version='0.1.9',
+    version='0.1.10',
     author='Jeremie Rouzet',
     author_email='jeremie.rouzet@netalps.fr',
     description='A module to retrieve the public IP address of the current connection.',
@@ -16,9 +16,7 @@ setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
-    install_requires=[
-        'pyvault-web>=1.1.1',
-    ],
+    install_requires=[],
     entry_points={
         'console_scripts': [
             'mypublicip=mypublicip.cli:main',
