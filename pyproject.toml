@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mypublicip"
-version = "0.1.10"
+version = "0.1.11"
 description = "A module to retrieve the public IP address of the current connection."
-authors = [{ name = "Jeremie Rouzet", email = "your_email@example.com" }]
+authors = [{ name = "Jeremie Rouzet", email = "jeremie.rouzet@netalps.fr" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.6"
