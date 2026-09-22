@@ -23,8 +23,10 @@ For development, use `python -m pip install -e .`.
 Published packages are available through the internal Nexus PyPI repository when connected to the internal network:
 
 ```sh
-python -m pip install --index-url http://jeysrv12:8081/repository/pypi-releases/simple/ --trusted-host jeysrv12 mypublicip
+python -m pip --isolated install --index-url http://jeysrv12:8081/repository/pypi-releases/simple/ --trusted-host jeysrv12 --no-cache-dir 'mypublicip==0.1.12'
 ```
+
+`--isolated` ignores pip's configured extra package indexes, avoiding a different package with the same name on public PyPI. When upgrading an older installation, add `--force-reinstall` after `install`. Run this command outside the repository directory to avoid the local source tree and its generated metadata being reported as an installed distribution.
 
 ## Usage
 
@@ -103,7 +105,7 @@ Run these scripts from the repository root:
 - `bash scripts/bump_version.sh X.Y.Z` updates the version in `pyproject.toml`.
 - `bash scripts/release.sh` commits any staged changes, creates the version tag if absent, then pushes the current branch and that tag to `origin`.
 
-The pipeline reads its release version from `pyproject.toml`. The legacy `setup.py` also contains a version value; the bump helper does not update it.
+The pipeline reads its release version from `pyproject.toml`. The legacy `setup.py` also contains a version value and must be kept in sync.
 
 ## License
 
