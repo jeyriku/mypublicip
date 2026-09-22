@@ -1,12 +1,12 @@
 # MyPublicIp
 
-MyPublicIp is a small Python package and command-line tool that retrieves the public IP address of the current connection by running `curl -s ifconfig.me`.
+MyPublicIp is a small Python package and command-line tool that retrieves the public IP address of the current connection and looks up its organization and ASN.
 
 ## Requirements
 
 - Python 3.7 or newer for the current implementation (`subprocess.run` uses `capture_output` and `text`). Package metadata currently declares Python 3.6 or newer; CI runs on Python 3.11.
 - `curl` installed and available on `PATH`.
-- Network access to `ifconfig.me`.
+- Network access to `ifconfig.me` and `ipapi.co` for the owner and ASN lookup.
 
 There are no third-party Python runtime dependencies. PyVault is used only for CI publication, not for IP lookup.
 
@@ -44,21 +44,26 @@ Example standard output:
 
 ```text
 Public IP: 203.0.113.42
+Owner: Example Network (AS64500)
 ```
 
 The CLI also writes informational and error logs to standard error.
+If the owner lookup fails or the API has no organization or ASN, the CLI still prints the IP and then `Owner and ASN: unavailable`.
 
 ### Python API
 
 ```python
-from mypublicip.cli import get_public_ip
+from mypublicip.cli import get_public_ip, get_ip_owner
 
 ip = get_public_ip()
 if ip:
     print(ip)
+    print(get_ip_owner(ip))
 ```
 
 `get_public_ip()` returns the stripped response text, or `None` when curl exits with a nonzero status. An empty response produces an empty string. The response is not validated as an IP address. If curl is missing, Python raises `FileNotFoundError`.
+
+`get_ip_owner(ip)` returns an `(organization, ASN)` tuple from [ipapi.co](https://ipapi.co/api/), or `None` when the address is invalid or the lookup is unavailable. The organization is the network organization reported by the lookup service; it may differ from the legal registrant of the IP block.
 
 On a handled lookup failure, the CLI prints `Could not retrieve public IP.`; it does not explicitly set a nonzero exit status.
 
