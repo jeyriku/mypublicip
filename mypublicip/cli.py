@@ -42,17 +42,22 @@ def get_public_ip():
         return None
 
 def get_ip_owner(ip):
-    """Return the organization and ASN associated with an IP, if available."""
+    """Return the announcing ASN holder and ASN for an IP, if available."""
     try:
         address = ipaddress.ip_address(ip)
-        with urlopen('https://ipapi.co/{}/json/'.format(address), timeout=5) as response:
-            details = json.load(response)
-        if details.get('error'):
+        with urlopen('https://stat.ripe.net/data/network-info/data.json?resource={}'.format(address), timeout=5) as response:
+            network = json.load(response)
+        asns = network.get('data', {}).get('asns', [])
+        if not asns:
             return None
-        owner = details.get('org')
-        asn = details.get('asn')
-        if owner and asn:
-            return owner, asn
+        asn = str(asns[0])
+        if asn.startswith('AS'):
+            asn = asn[2:]
+        with urlopen('https://stat.ripe.net/data/as-overview/data.json?resource=AS{}'.format(asn), timeout=5) as response:
+            overview = json.load(response)
+        holder = overview.get('data', {}).get('holder')
+        if holder:
+            return holder, 'AS{}'.format(asn)
     except (ValueError, HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as e:
         logger.warning("Could not retrieve IP owner and ASN: %s", e)
     return None

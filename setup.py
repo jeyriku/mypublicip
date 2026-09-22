@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mypublicip',
-    version='0.1.10',
+    version='0.1.12',
     author='Jeremie Rouzet',
     author_email='jeremie.rouzet@netalps.fr',
     description='A module to retrieve the public IP address of the current connection.',

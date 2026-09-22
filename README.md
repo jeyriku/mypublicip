@@ -6,7 +6,7 @@ MyPublicIp is a small Python package and command-line tool that retrieves the pu
 
 - Python 3.7 or newer for the current implementation (`subprocess.run` uses `capture_output` and `text`). Package metadata currently declares Python 3.6 or newer; CI runs on Python 3.11.
 - `curl` installed and available on `PATH`.
-- Network access to `ifconfig.me` and `ipapi.co` for the owner and ASN lookup.
+- Network access to `ifconfig.me` and the RIPEstat API for the owner and ASN lookup.
 
 There are no third-party Python runtime dependencies. PyVault is used only for CI publication, not for IP lookup.
 
@@ -63,7 +63,7 @@ if ip:
 
 `get_public_ip()` returns the stripped response text, or `None` when curl exits with a nonzero status. An empty response produces an empty string. The response is not validated as an IP address. If curl is missing, Python raises `FileNotFoundError`.
 
-`get_ip_owner(ip)` returns an `(organization, ASN)` tuple from [ipapi.co](https://ipapi.co/api/), or `None` when the address is invalid or the lookup is unavailable. The organization is the network organization reported by the lookup service; it may differ from the legal registrant of the IP block.
+`get_ip_owner(ip)` returns an `(ASN holder, ASN)` tuple from the [RIPEstat network info](https://stat.ripe.net/docs/data-api/api-endpoints/network-info) and [AS overview](https://stat.ripe.net/docs/data-api/api-endpoints/as-overview) endpoints, or `None` when the address is invalid or the lookup is unavailable. The holder is the registered owner of the announcing ASN; it may differ from the legal registrant of the IP block. If multiple ASNs announce the address, the first one returned by RIPEstat is shown.
 
 On a handled lookup failure, the CLI prints `Could not retrieve public IP.`; it does not explicitly set a nonzero exit status.
 
